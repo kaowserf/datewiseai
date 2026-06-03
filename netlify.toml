@@ -1,0 +1,37 @@
+# Netlify configuration for DateWise AI (Flutter web).
+#
+# Used both for CLI deploys (`netlify deploy`) and, if you connect this repo to
+# Netlify for continuous deployment, for building in Netlify's CI.
+
+[build]
+  # Folder Netlify publishes. `flutter build web` outputs here.
+  publish = "build/web"
+
+  # Build command for Git-connected continuous deploys. Installs Flutter, then
+  # builds the web release. (Ignored for manual `netlify deploy --dir` uploads.)
+  command = """
+    if [ ! -d "$HOME/flutter" ]; then \
+      git clone https://github.com/flutter/flutter.git -b stable --depth 1 "$HOME/flutter"; \
+    fi; \
+    export PATH="$HOME/flutter/bin:$PATH"; \
+    flutter config --enable-web; \
+    flutter pub get; \
+    flutter build web --release
+  """
+
+# SPA fallback so deep links resolve to the app shell.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Long-cache the immutable Flutter build assets.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/canvaskit/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

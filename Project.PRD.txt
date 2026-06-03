@@ -1,0 +1,146 @@
+Lumière — Product Requirements Document
+AI Dating Coach Application
+
+Version 1.0 | June 2026
+
+1. Executive Summary
+Lumière is a premium AI-powered dating coach application designed to help users optimize their dating profiles, improve conversation skills, and receive visual feedback on their photos. The app operates on a three-tier subscription model, delivering escalating value from basic profile rewrites to full AI photo coaching with match-rate predictions.
+
+The platform combines a romantic, blush-toned visual identity with advanced conversational AI (via the Lovable AI Gateway) to create an intimate, high-end coaching experience that feels like having a stylish best friend who happens to be a top dating strategist.
+
+2. Product Vision & Goals
+2.1 Vision Statement
+To become the world's most trusted AI dating coach — combining brutal honesty, strategic insight, and warm encouragement to help every user present their most magnetic self.
+
+2.2 Goals
+Primary: Convert free visitors into paid subscribers through a compelling landing page and frictionless tier selection.
+Secondary: Maximize user engagement through threaded, persistent coaching conversations with tier-appropriate AI capabilities.
+Tertiary: Deliver measurable dating profile improvements that users can attribute directly to the platform.
+3. Target Audience
+Primary: Single adults aged 22-40 who actively use dating apps (Hinge, Tinder, Bumble, Raya) and want to improve their match rates and conversation quality.
+Secondary: Recently single individuals re-entering the dating scene who need help modernizing their profiles.
+Tertiary: Users in relationships seeking date planning and conversation coaching.
+4. Subscription Tiers & Pricing
+Three weekly subscription tiers are offered, each unlocking progressively deeper AI coaching capabilities.
+
+Feature	Spark ($4.99/wk)	Flame ($7.99/wk)	Magnet ($13.99/wk)
+Profile Audit	Yes	Yes	Yes
+Bio Rewrites	Yes	Yes	Yes
+Opening Lines	Yes	Yes	Yes
+Daily Tips	Yes	Yes	Yes
+Unlimited Chat	No	Yes	Yes
+Conversation Scripts	No	Yes	Yes
+Date Planning	No	Yes	Yes
+Message Reviews	No	Yes	Yes
+AI Photo Coach	No	No	Yes
+Outfit Critique	No	No	Yes
+Match-Rate Prediction	No	No	Yes
+Priority Response	No	No	Yes
+5. Core Features
+5.1 Landing Page & Conversion
+The homepage serves as the primary conversion funnel, featuring a hero section, feature highlights, pricing comparison, testimonials, and a clear call-to-action. Users select their tier and are routed to the chat interface.
+
+5.2 AI Coaching Chat
+Users interact with Lumière (the AI coach) through a threaded chat interface. Multiple conversation threads are supported, allowing users to manage separate coaching topics (e.g., "Profile Setup", "Date Planning", "Photo Review").
+
+The AI adapts its capabilities based on the user's subscription tier:
+
+Spark: Profile basics, bio rewrites, opening lines, daily tips
+Flame: Unlimited conversational coaching, scripts, date planning, ghosting recovery
+Magnet: Full photo analysis with scoring, outfit/lighting/pose critique, match-rate predictions, profile-order optimization
+5.3 Photo Upload & Analysis (Magnet Tier)
+Magnet-tier users can upload photos directly into the chat. The AI evaluates each image across multiple dimensions:
+
+Lighting quality and direction
+Expression authenticity and approachability
+Outfit appropriateness and style
+Framing, composition, and background
+Overall vibe and signal to potential matches
+Each photo receives a 1-10 score and a clear verdict: KEEP, RESHOOT, or DELETE — with specific, actionable feedback.
+
+5.4 Thread Management
+Users can create, rename, and delete coaching threads. Chat history persists in browser localStorage. Threads are listed in a sidebar for easy navigation.
+
+6. Technical Architecture
+6.1 Frontend
+Framework: TanStack Start v1 with React 19
+Styling: Tailwind CSS v4 with custom Romantic Blush theme
+Routing: File-based TanStack Router
+State: LocalStorage for tier selection and chat thread persistence
+UI Components: Custom shadcn/ui components with romantic styling
+6.2 Backend & AI
+AI Gateway: Lovable AI Gateway with google/gemini-3-flash-preview
+Server Functions: TanStack createServerFn for chat streaming
+Data Storage: Browser localStorage (no cloud persistence per user preference)
+Photo Handling: Client-side upload, base64 encoding for AI analysis
+6.3 Design System
+Color Palette (Romantic Blush):
+
+Background: #faf8f5 (warm cream)
+Surface: #f0ebe3 (soft sand)
+Primary: #c44569 (romantic rose)
+Accent: #e88aab (blush pink)
+Text: #2d2d2d (rich black)
+7. User Flows
+7.1 First-Time Visitor
+Lands on homepage (/)
+Views hero, features, pricing sections
+Selects subscription tier
+Redirected to chat interface (/chat)
+First thread auto-created; AI introduces itself
+User begins coaching conversation
+7.2 Returning User
+Lands on homepage (or directly on /chat)
+Tier preference recalled from localStorage
+Previous threads loaded from localStorage
+Continues existing conversation or creates new thread
+7.3 Photo Review Flow (Magnet Only)
+User opens photo-enabled thread
+Uploads photo via chat input
+AI processes image and returns analysis
+User receives score, verdict, and improvement tips
+Can upload additional photos for comparison
+8. AI Persona & Voice Guidelines
+Name: Lumière
+
+Persona: An elite, warm, and brutally honest dating coach who speaks like a stylish, modern best friend.
+
+Voice Characteristics:
+
+Direct and warm, never generic or preachy
+Short paragraphs with bullet lists when useful
+Uses bold formatting for punchlines and key takeaways
+Asks one sharp follow-up question when context is needed
+Grounds advice in user's specific app, gender, dating goal, city, and target person
+Rewrites bios in full, provides exact copy-paste opener lines
+Never moralizes or hedges with "it depends" without giving a concrete answer
+9. Non-Functional Requirements
+Performance: AI responses stream in real-time. Page load time under 2 seconds on 3G.
+Accessibility: WCAG 2.1 AA compliant. Proper contrast ratios, keyboard navigation, screen reader support.
+SEO: Meta tags, Open Graph, sitemap.xml, robots.txt configured. Semantic HTML throughout.
+Responsive: Full mobile-first design. Sidebar collapses to drawer on mobile. Touch-friendly chat interface.
+Privacy: No server-side storage of chat history or photos. All data remains in user's browser.
+10. Future Roadmap
+Phase 2 (Next Quarter): User accounts with cloud persistence, payment integration (Stripe/Paddle), push notifications for daily tips.
+Phase 3 (Following Quarter): Social features (share profile for community feedback), date tracker, integration with dating app APIs (read-only).
+Phase 4 (Future): AI-generated photo improvements, video coaching, group coaching sessions, personalized dating dashboards with match-rate analytics.
+11. Success Metrics
+Landing page conversion rate (tier selection / total visitors)
+Average session duration in chat
+Messages per thread by tier
+Photo upload frequency (Magnet tier)
+Thread creation rate per user
+User retention (return visits within 7 days)
+12. Risks & Mitigations
+Risk	Impact	Mitigation
+AI gives poor/offensive advice	High — brand damage, user churn	System prompt engineering, tier restrictions, user feedback loop
+Users don't upgrade from Spark	Medium — revenue ceiling	In-app upgrade prompts, clear tier differentiation, free trial of Flame features
+Photo analysis inaccurate	Medium — Magnet tier churn	Calibrated scoring rubric, clear that AI is advisory, not absolute
+Browser storage cleared	Low — user frustration	Cloud backup prompt, export history feature
+13. Glossary
+Lumière: The AI dating coach persona.
+Spark / Flame / Magnet: The three subscription tiers, named to evoke increasing romantic magnetism.
+Thread: A named conversation session with the AI coach.
+Match-Rate: AI-predicted likelihood that a given photo will result in matches on dating apps.
+Lovable AI Gateway: The AI model provider abstraction used for streaming responses.
+End of Document
