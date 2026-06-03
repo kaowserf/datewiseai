@@ -1,27 +1,43 @@
 /// Configuration for the AI backend.
 ///
 /// DateWise AI ships with a fully-working **mock** coach so the app runs
-/// end-to-end with zero setup. To use a real model (Google Gemini, as named in
-/// the PRD), drop your key here — or, preferably, pass it at build/run time:
+/// end-to-end with zero setup.
 ///
-///   flutter run --dart-define=GEMINI_API_KEY=your_key_here
+/// The premium **AI Photo Coach** calls a secure backend (a Cloudflare Worker —
+/// see `backend/worker.js`) that holds the Gemini key server-side. The app only
+/// knows the Worker's public URL; the key is never shipped to the browser.
 ///
-/// When a non-empty key is present, [AIServiceFactory] wires the real Gemini
-/// client; otherwise it falls back to the mock. No key is ever committed.
+/// Set the URL at build/run time (recommended):
+///   flutter run --dart-define=PHOTO_COACH_URL=https://your-worker.workers.dev
+/// or paste it into [_inlinePhotoCoachUrl] below (the URL is not a secret).
 class AIConfig {
   AIConfig._();
 
-  /// Read from a --dart-define first (recommended), then any inline fallback.
+  // --- Secure photo-coach backend (Cloudflare Worker) ---------------------
+
+  /// Public URL of the photo-coach Worker. Read from a --dart-define first,
+  /// then any inline fallback. When empty, the photo coach uses the mock.
+  static const String photoCoachUrl = String.fromEnvironment(
+    'PHOTO_COACH_URL',
+    defaultValue: _inlinePhotoCoachUrl,
+  );
+
+  /// Paste your deployed Worker URL here (safe to commit — not a secret).
+  static const String _inlinePhotoCoachUrl =
+      'https://datewise-photo-coach.kaowserprobd.workers.dev';
+
+  static bool get hasPhotoCoachBackend => photoCoachUrl.trim().isNotEmpty;
+
+  // --- Optional direct (client-side) Gemini key ---------------------------
+  // NOTE: a key shipped in the web build is publicly visible. Prefer the
+  // backend above for anything real. This exists only for quick local tests.
+
   static const String geminiApiKey = String.fromEnvironment(
     'GEMINI_API_KEY',
     defaultValue: _inlineKey,
   );
-
-  /// Optional inline key for quick local testing. Leave empty for production.
   static const String _inlineKey = '';
+  static const String geminiModel = 'gemini-2.0-flash';
 
-  /// Model id from the PRD's spirit (latest fast Gemini flash model).
-  static const String geminiModel = 'gemini-1.5-flash';
-
-  static bool get hasRealProvider => geminiApiKey.trim().isNotEmpty;
+  static bool get hasClientGeminiKey => geminiApiKey.trim().isNotEmpty;
 }

@@ -50,6 +50,9 @@ dependencies:
   # Unique ids for threads/messages
   uuid: ^4.5.1
 
+  # Calls the secure photo-coach backend (Cloudflare Worker)
+  http: ^1.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
