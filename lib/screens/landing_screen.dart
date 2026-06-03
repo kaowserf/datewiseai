@@ -9,6 +9,7 @@ import '../widgets/common/brand_mark.dart';
 import '../widgets/common/effects.dart';
 import '../widgets/landing/pricing_card.dart';
 import 'chat_screen.dart';
+import 'onboarding_screen.dart';
 
 /// Responsive breakpoints used across the landing page.
 class Breakpoints {
@@ -44,10 +45,20 @@ class _LandingScreenState extends State<LandingScreen> {
     super.dispose();
   }
 
-  void _goToChat() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const ChatScreen()),
-    );
+  /// Enters the app after a tier is chosen: first-timers go through the profile
+  /// questionnaire; returning users (with a saved profile) go straight to chat.
+  void _enterApp() {
+    final state = context.read<AppState>();
+    if (!state.hasProfile) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+      );
+    } else {
+      state.ensureStarterThread();
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const ChatScreen()),
+      );
+    }
   }
 
   /// Enter coaching. Uses the user's saved tier if they have one, otherwise
@@ -58,14 +69,14 @@ class _LandingScreenState extends State<LandingScreen> {
     final tier = state.tier ?? SubscriptionTier.flame;
     await state.selectTier(tier);
     if (!mounted) return;
-    _goToChat();
+    _enterApp();
   }
 
-  /// Pick a specific tier from the pricing cards / final CTA, then enter chat.
+  /// Pick a specific tier from the pricing cards / final CTA, then continue.
   Future<void> _selectTier(SubscriptionTier tier) async {
     await context.read<AppState>().selectTier(tier);
     if (!mounted) return;
-    _goToChat();
+    _enterApp();
   }
 
   void _scrollTo(GlobalKey key) {
@@ -186,7 +197,7 @@ class _LandingScreenState extends State<LandingScreen> {
                     hasTier
                         ? HoverScale(
                             child: FilledButton(
-                              onPressed: _goToChat,
+                              onPressed: _enterApp,
                               style: FilledButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                               ),

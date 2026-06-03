@@ -1,4 +1,5 @@
 import '../models/tier.dart';
+import '../models/user_profile.dart';
 
 /// DateWise AI — the dating coach persona (PRD section 8).
 ///
@@ -62,8 +63,11 @@ sentences, then ask the single most useful question to get started.''';
     }
   }
 
-  /// First message shown when a fresh thread is created, per tier.
-  static String greeting(SubscriptionTier tier) {
+  /// First message shown when a fresh thread is created, per tier. When a
+  /// [profile] is present, the greeting is personalised and skips re-asking the
+  /// basics the user already gave during onboarding.
+  static String greeting(SubscriptionTier tier, {UserProfile? profile}) {
+    if (profile != null) return _personalisedGreeting(tier, profile);
     switch (tier) {
       case SubscriptionTier.spark:
         return "Hi, I'm **DateWise AI** — your dating strategist. ✨ On Spark I'll "
@@ -81,6 +85,29 @@ sentences, then ask the single most useful question to get started.''';
             "Drop a profile photo and I'll score it, give you a KEEP / RESHOOT "
             "/ DELETE verdict, and predict the match-rate lift. Or tell me "
             "what you're working on first — **what's your dating goal?**";
+    }
+  }
+
+  static String _personalisedGreeting(SubscriptionTier tier, UserProfile p) {
+    final lead =
+        "Got it — a **${p.age}-year-old ${p.gender.label.toLowerCase()}** on "
+        "**${p.app.label}**, into **${p.interestedIn.label.toLowerCase()}**, "
+        "looking for **${p.goal.label.toLowerCase()}**. That's exactly what I "
+        "tune for. 💫\n\n";
+    switch (tier) {
+      case SubscriptionTier.spark:
+        return "${lead}Let's start where it moves the needle fastest: your "
+            "**profile**. Want me to **rewrite your bio**, or hand you "
+            "**opening lines** first?";
+      case SubscriptionTier.flame:
+        return "${lead}We can go deep — **bio rewrites, openers, full "
+            "conversation scripts, date plans**. What's the situation you want "
+            "to crack first?";
+      case SubscriptionTier.magnet:
+        return "${lead}You've got the full toolkit, including my **AI Photo "
+            "Coach**. 🧲 **Drop your main profile photo** and I'll score it "
+            "1-10 with a KEEP / RESHOOT / DELETE call — or we can start with "
+            "your bio. Your move.";
     }
   }
 }

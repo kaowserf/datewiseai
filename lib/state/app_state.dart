@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../app_flags.dart';
 import '../models/chat_message.dart';
 import '../models/chat_thread.dart';
 import '../models/photo_analysis.dart';
 import '../models/tier.dart';
+import '../models/user_profile.dart';
 import '../services/ai_service.dart';
 import '../services/persona.dart';
 import '../services/storage_service.dart';
@@ -34,6 +36,32 @@ class AppState extends ChangeNotifier {
 
   bool can(Capability capability) => tierInfo.can(capability);
 
+  /// Whether the AI Photo Coach is usable. Normally Magnet-only, but the
+  /// testing flag unlocks it on every tier (see [AppFlags]).
+  bool get photoCoachUnlocked =>
+      AppFlags.unlockPhotoCoachForTesting || can(Capability.photoCoach);
+
+  // --- User profile -------------------------------------------------------
+
+  UserProfile? _profile;
+  UserProfile? get profile => _profile;
+  bool get hasProfile => _profile != null;
+
+  /// Saves the onboarding profile and creates the first personalised thread.
+  Future<void> completeOnboarding(UserProfile profile) async {
+    _profile = profile;
+    await _storage.saveProfile(profile);
+    await ensureStarterThread();
+    notifyListeners();
+  }
+
+  /// Creates the initial "Profile Setup" thread if the user has none yet.
+  Future<void> ensureStarterThread() async {
+    if (_threads.isEmpty) {
+      await createThread(title: 'Profile Setup', greet: true);
+    }
+  }
+
   // --- Threads ------------------------------------------------------------
 
   final List<ChatThread> _threads = [];
@@ -55,6 +83,7 @@ class AppState extends ChangeNotifier {
 
   void _load() {
     _tier = _storage.loadTier();
+    _profile = _storage.loadProfile();
     _threads
       ..clear()
       ..addAll(_storage.loadThreads());
@@ -65,14 +94,11 @@ class AppState extends ChangeNotifier {
 
   // --- Tier selection -----------------------------------------------------
 
+  /// Records the chosen tier. The starter thread is created after onboarding
+  /// (see [completeOnboarding]) so the greeting can be personalised.
   Future<void> selectTier(SubscriptionTier tier) async {
     _tier = tier;
     await _storage.saveTier(tier);
-    await _storage.setOnboarded();
-    // Ensure there's a starter thread to land in.
-    if (_threads.isEmpty) {
-      await createThread(title: 'Profile Setup', greet: true);
-    }
     notifyListeners();
   }
 
@@ -91,7 +117,10 @@ class AppState extends ChangeNotifier {
         ChatMessage(
           id: _uuid.v4(),
           role: MessageRole.coach,
-          text: CoachPersona.greeting(_tier ?? SubscriptionTier.spark),
+          text: CoachPersona.greeting(
+            _tier ?? SubscriptionTier.spark,
+            profile: _profile,
+          ),
           createdAt: now,
         ),
       );
@@ -149,8 +178,9 @@ class AppState extends ChangeNotifier {
     _bumpToTop(thread);
     notifyListeners();
 
-    // Magnet photo coach: produce a structured analysis card.
-    if (imageBase64 != null && can(Capability.photoCoach)) {
+    // Photo coach: produce a structured analysis card (Magnet, or any tier
+    // while the testing flag is on).
+    if (imageBase64 != null && photoCoachUnlocked) {
       await _runPhotoAnalysis(thread, imageBase64, text);
       return;
     }
@@ -208,9 +238,14 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // When testing-unlocked on a lower tier, present as Magnet so the
+      // backend (which gates on tier) accepts the request.
+      final effectiveTier = photoCoachUnlocked && !can(Capability.photoCoach)
+          ? SubscriptionTier.magnet
+          : (_tier ?? SubscriptionTier.magnet);
       final PhotoAnalysis analysis = await _ai.analyzePhoto(
         imageBase64: imageBase64,
-        tier: _tier ?? SubscriptionTier.magnet,
+        tier: effectiveTier,
         userNote: note,
       );
       final verdict = analysis.verdict.label;

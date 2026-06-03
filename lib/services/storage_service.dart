@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/chat_thread.dart';
 import '../models/tier.dart';
+import '../models/user_profile.dart';
 
 /// Browser-localStorage-style persistence (PRD: all data stays on the device,
 /// no cloud). On web, [SharedPreferences] is backed by window.localStorage.
@@ -15,6 +16,7 @@ class StorageService {
   static const _kTier = 'dw_tier';
   static const _kThreads = 'dw_threads';
   static const _kOnboarded = 'dw_onboarded';
+  static const _kProfile = 'dw_profile';
 
   static Future<StorageService> create() async {
     final prefs = await SharedPreferences.getInstance();
@@ -34,6 +36,21 @@ class StorageService {
 
   bool get hasOnboarded => _prefs.getBool(_kOnboarded) ?? false;
   Future<void> setOnboarded() => _prefs.setBool(_kOnboarded, true);
+
+  // --- User profile -------------------------------------------------------
+
+  UserProfile? loadProfile() {
+    final raw = _prefs.getString(_kProfile);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      return UserProfile.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> saveProfile(UserProfile profile) =>
+      _prefs.setString(_kProfile, jsonEncode(profile.toJson()));
 
   // --- Threads ------------------------------------------------------------
 
@@ -59,5 +76,6 @@ class StorageService {
     await _prefs.remove(_kThreads);
     await _prefs.remove(_kTier);
     await _prefs.remove(_kOnboarded);
+    await _prefs.remove(_kProfile);
   }
 }

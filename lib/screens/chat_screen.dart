@@ -66,7 +66,7 @@ class _ChatScreenState extends State<ChatScreen> {
       thread: state.activeThread,
       scrollController: _scrollController,
       isResponding: state.isResponding,
-      canSendPhoto: state.can(Capability.photoCoach),
+      canSendPhoto: state.photoCoachUnlocked,
       onSend: ({String text = '', String? imageBase64}) =>
           _handleSend(context, text: text, imageBase64: imageBase64),
       onPhotoBlocked: () => _showUpgradeSheet(context),
