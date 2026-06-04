@@ -112,6 +112,7 @@ class _LandingScreenState extends State<LandingScreen> {
       KeyedSubtree(key: _howKey, child: const _HowItWorks()),
       KeyedSubtree(key: _pricingKey, child: _Pricing(onSelect: _selectTier)),
       KeyedSubtree(key: _storiesKey, child: const _Stories()),
+      const _DownloadApp(),
       _FinalCta(onStart: _startCoaching),
       _Footer(
         onStart: _startCoaching,
@@ -1124,6 +1125,152 @@ class _NavLinkState extends State<_NavLink> {
               fontSize: 14,
             ),
             child: Text(widget.label),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "Get the app" section — App Store / Google Play buttons that surface a
+/// friendly "coming soon" dialog (the mobile apps are in development).
+class _DownloadApp extends StatelessWidget {
+  const _DownloadApp();
+
+  void _showComingSoon(BuildContext context, String platform) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: AppColors.romanticGradient,
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+              child: const Icon(Icons.rocket_launch_rounded,
+                  color: Colors.white, size: 20),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            const Expanded(child: Text('Coming soon!')),
+          ],
+        ),
+        content: Text(
+          'Our $platform app is under active development and will release '
+          'soon. 🚧\n\nIn the meantime, DateWise AI works beautifully right '
+          'here in your browser — no download needed.',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Section(
+      background: Colors.white,
+      child: Column(
+        children: [
+          const _SectionHeading(
+            eyebrow: 'Mobile apps',
+            title: 'Take DateWise AI everywhere',
+            subtitle: 'Native Android & iOS apps are on the way. '
+                'Be the first to coach on the go.',
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Wrap(
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.md,
+            alignment: WrapAlignment.center,
+            children: [
+              _StoreButton(
+                icon: Icons.apple,
+                topLine: 'Download on the',
+                bottomLine: 'App Store',
+                onTap: () => _showComingSoon(context, 'iOS'),
+              ),
+              _StoreButton(
+                icon: Icons.android,
+                topLine: 'Get it on',
+                bottomLine: 'Google Play',
+                onTap: () => _showComingSoon(context, 'Android'),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Available on the web right now — apps launching soon.',
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: AppColors.textMuted),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StoreButton extends StatelessWidget {
+  const _StoreButton({
+    required this.icon,
+    required this.topLine,
+    required this.bottomLine,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String topLine;
+  final String bottomLine;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return HoverScale(
+      child: Material(
+        color: AppColors.text,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: Container(
+            width: 200,
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md, vertical: 12),
+            child: Row(
+              children: [
+                Icon(icon, color: Colors.white, size: 30),
+                const SizedBox(width: AppSpacing.sm),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      topLine,
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 11),
+                    ),
+                    Text(
+                      bottomLine,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
